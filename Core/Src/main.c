@@ -238,20 +238,21 @@ int menu_main() {
 
 int menu_enroll() {
   OLED_Clear();
-  OLED_ShowCHinese(0, 0, 13, 0);
-  OLED_ShowCHinese(16, 0, 14, 0);
-  OLED_ShowCHinese(32, 0, 15, 0);
-  OLED_ShowCHinese(48, 0, 16, 0);
+  OLED_ShowTime();
+  OLED_ShowCHinese(0, 2, 13, 0);  // 再
+  OLED_ShowCHinese(16, 2, 14, 0); // 按
+  OLED_ShowCHinese(32, 2, 15, 0); // 一
+  OLED_ShowCHinese(48, 2, 16, 0); // 次
 
-  OLED_ShowCHinese(64, 0, 0, 0);
-  OLED_ShowCHinese(80, 0, 1, 0);
-  OLED_ShowCHinese(96, 0, 6, 0);
-  OLED_ShowCHinese(112, 0, 7, 0);
+  OLED_ShowCHinese(64, 2, 0, 0);  // 注
+  OLED_ShowCHinese(80, 2, 1, 0);  // 册
+  OLED_ShowCHinese(96, 2, 6, 0);  // 人
+  OLED_ShowCHinese(112, 2, 7, 0); // 脸
 
-  OLED_ShowCHinese(32, 2, 17, 0);
-  OLED_ShowCHinese(48, 2, 18, 0);
-  OLED_ShowCHinese(64, 2, 19, 0);
-  OLED_ShowNum(80, 2, ENROLL_ID, 2, 16, 0);
+  OLED_ShowCHinese(32, 4, 17, 0); // 序
+  OLED_ShowCHinese(48, 4, 18, 0); // 号
+  OLED_ShowCHinese(64, 4, 19, 0); // ：
+  OLED_ShowNum(80, 4, ENROLL_ID, 2, 16, 0);
   HAL_GPIO_WritePin(FM225_CTL_GPIO_Port, FM225_CTL_Pin, GPIO_PIN_SET);
 
   while (1) {
@@ -259,15 +260,16 @@ int menu_enroll() {
       KEY3_PRESSED = 0;
 
       OLED_Clear();
-      OLED_ShowCHinese(40, 0, 0, 0);
-      OLED_ShowCHinese(56, 0, 1, 0);
-      OLED_ShowCHinese(72, 0, 24, 0);
+      OLED_ShowTime();
+      OLED_ShowCHinese(40, 2, 0, 0);  // 注
+      OLED_ShowCHinese(56, 2, 1, 0);  // 册
+      OLED_ShowCHinese(72, 2, 24, 0); // 中
 
-      OLED_ShowCHinese(24, 2, 8, 0);
-      OLED_ShowCHinese(40, 2, 20, 0);
-      OLED_ShowCHinese(56, 2, 21, 0);
-      OLED_ShowCHinese(72, 2, 22, 0);
-      OLED_ShowCHinese(88, 2, 23, 0);
+      OLED_ShowCHinese(24, 4, 8, 0);  // 请
+      OLED_ShowCHinese(40, 4, 20, 0); // 靠
+      OLED_ShowCHinese(56, 4, 21, 0); // 近
+      OLED_ShowCHinese(72, 4, 22, 0); // 设
+      OLED_ShowCHinese(88, 4, 23, 0); // 备
 
       uint8_t values[] = {0xef, 0xaa, 0x1d, 0x00, 0x23, 0x00, 0x00, 0x00, 0x00,
                           0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -297,11 +299,12 @@ int menu_enroll() {
           // 关闭FM225的电源
           HAL_GPIO_WritePin(FM225_CTL_GPIO_Port, FM225_CTL_Pin, GPIO_PIN_RESET);
           OLED_Clear();
-          OLED_ShowCHinese(24, 0, 6, 0);  // OLED显示’人‘
-          OLED_ShowCHinese(40, 0, 7, 0);  // OLED显示’脸‘
-          OLED_ShowCHinese(56, 0, 29, 0); // OLED显示’已‘
-          OLED_ShowCHinese(72, 0, 30, 0); // OLED显示’录‘
-          OLED_ShowCHinese(88, 0, 31, 0); // OLED显示’入‘
+          OLED_ShowTime();
+          OLED_ShowCHinese(24, 2, 6, 0);  // 人
+          OLED_ShowCHinese(40, 2, 7, 0);  // 脸
+          OLED_ShowCHinese(56, 2, 29, 0); // 已
+          OLED_ShowCHinese(72, 2, 30, 0); // 录
+          OLED_ShowCHinese(88, 2, 31, 0); // 入
 
           while (1) {
             if (KEY3_PRESSED == 1) {
@@ -701,9 +704,7 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
   }
 }
 // RTC秒中断回调函数
-void HAL_RTCEx_RTCEventCallback(RTC_HandleTypeDef *hrtc) {
-  OLED_ShowTime();
-}
+void HAL_RTCEx_RTCEventCallback(RTC_HandleTypeDef *hrtc) { OLED_ShowTime(); }
 /* USER CODE END 4 */
 
 /**
