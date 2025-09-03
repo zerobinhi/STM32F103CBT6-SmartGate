@@ -21,6 +21,7 @@
 #ifndef __RTC_H__
 #define __RTC_H__
 
+#include <stdint.h>
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -35,26 +36,15 @@ extern "C" {
 extern RTC_HandleTypeDef hrtc;
 
 /* USER CODE BEGIN Private defines */
-typedef struct
-{
-    __IO uint8_t hour;
-    __IO uint8_t min;
-    __IO uint8_t sec;
-    //公历日月年周
-    __IO uint16_t w_year;
-    __IO uint8_t  w_month;
-    __IO uint8_t  w_date;
-    __IO uint8_t  week;
-}_calendar_obj;
-extern _calendar_obj calendar;            //日历结构体
+extern uint16_t date_info[];
 /* USER CODE END Private defines */
 
 void MX_RTC_Init(void);
 
 /* USER CODE BEGIN Prototypes */
 void rtc_init_user(void);
-void RTC_Set(uint16_t syear,uint8_t smon,uint8_t sday,uint8_t hour,uint8_t min,uint8_t sec);
-void RTC_Get(void);
+void RTC_GetTime(void);
+void RTC_SetTime(uint16_t *time_info);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

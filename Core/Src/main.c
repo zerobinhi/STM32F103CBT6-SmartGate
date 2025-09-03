@@ -57,7 +57,6 @@ __IO uint8_t KEY2_PRESSED = 0;
 __IO uint8_t KEY3_PRESSED = 0;
 uint8_t ENROLL_ID = 1;
 uint8_t DELETE_ID = 1;
-static uint16_t sec_count = 0;
 
 uint8_t TX_BUFFER[TX_BUFF_SIZE] = {0};
 __IO uint8_t RX_BUFFER[RX_BUFF_SIZE] = {0};
@@ -634,15 +633,15 @@ int menu_delete() {
   }
 }
 void OLED_ShowTime(void) {
-  char buf[25]; // 存放 "YYYY-MM-DD HH:MM"
+  char buf[50]; // 存放 "YYYY-MM-DD HH:MM"
 
   /* 获取 RTC 当前时间和日期 */
-  RTC_Get();
+  RTC_GetTime();
 
   /* 格式化日期 + 时分 */
   memset(buf, 0, sizeof(buf));
-  sprintf(buf, "%04d-%02d-%02d %02d:%02d", calendar.w_year, calendar.w_month,
-          calendar.w_date, calendar.hour, calendar.min);
+  sprintf(buf, "%04d-%02d-%02d %02d:%02d", date_info[0], date_info[1],
+          date_info[2], date_info[3], date_info[4]);
 
   /* 显示在 OLED 第一行 */
   OLED_ShowString(0, 0, buf, 16, 0);
