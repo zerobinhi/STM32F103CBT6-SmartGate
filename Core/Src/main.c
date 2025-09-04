@@ -124,7 +124,6 @@ int main(void)
   HAL_TIM_Base_Start_IT(&htim2); // 音频引脚下降沿的时长
   HAL_TIM_Base_Start_IT(&htim3); // OLED每秒更新RTC时钟
   OLED_Init();                   // OLED初始
-  OLED_Clear();                  // 清屏
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -216,7 +215,7 @@ uint8_t calculateBCC(uint8_t *data, int length) {
 
 int menu_main() {
   menu = NULL;
-  OLED_Clear();
+  OLED_ClearRows(2,7);// 清空2~7行
   OLED_ShowTime();
 
   OLED_ShowCHinese(32, 2, 0, 0);
@@ -237,7 +236,7 @@ int menu_main() {
 }
 
 int menu_enroll() {
-  OLED_Clear();
+  OLED_ClearRows(2,7);// 清空2~7行
   OLED_ShowTime();
   OLED_ShowCHinese(0, 2, 13, 0);  // 再
   OLED_ShowCHinese(16, 2, 14, 0); // 按
@@ -259,7 +258,7 @@ int menu_enroll() {
     if (KEY3_PRESSED == 1) {
       KEY3_PRESSED = 0;
 
-      OLED_Clear();
+      OLED_ClearRows(2,7);// 清空2~7行
       OLED_ShowTime();
       OLED_ShowCHinese(40, 2, 0, 0);  // 注
       OLED_ShowCHinese(56, 2, 1, 0);  // 册
@@ -298,7 +297,7 @@ int menu_enroll() {
 
           // 关闭FM225的电源
           HAL_GPIO_WritePin(FM225_CTL_GPIO_Port, FM225_CTL_Pin, GPIO_PIN_RESET);
-          OLED_Clear();
+          OLED_ClearRows(2,7);// 清空2~7行
           OLED_ShowTime();
           OLED_ShowCHinese(24, 2, 6, 0);  // 人
           OLED_ShowCHinese(40, 2, 7, 0);  // 脸
@@ -415,14 +414,14 @@ int menu_enroll() {
       KEY2_PRESSED = 0;
       if (ENROLL_ID < 99) {
         ENROLL_ID++;
-        OLED_ShowNum(80, 2, ENROLL_ID, 2, 16, 0);
+        OLED_ShowNum(80, 4, ENROLL_ID, 2, 16, 0);
       }
     }
     if (KEY0_PRESSED == 1) {
       KEY0_PRESSED = 0;
       if (ENROLL_ID > 1) {
         ENROLL_ID--;
-        OLED_ShowNum(80, 2, ENROLL_ID, 2, 16, 0);
+        OLED_ShowNum(80, 4, ENROLL_ID, 2, 16, 0);
       }
     }
     if (KEY1_PRESSED == 1) {

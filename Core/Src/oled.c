@@ -84,6 +84,31 @@ void OLED_Clear(void) {
 }
 
 /**
+ * @function: OLED_ClearRows
+ * @description: 清屏指定页（行），起始页到结束页
+ * @param  {uint8_t} start_page 起始页（0~7）
+ * @param  {uint8_t} end_page   结束页（0~7）
+ */
+void OLED_ClearRows(uint8_t start_page, uint8_t end_page)
+{
+    uint8_t i, n;
+
+    if (start_page > 7) start_page = 7;
+    if (end_page > 7) end_page = 7;
+    if (start_page > end_page) return; // 参数错误直接返回
+
+    for (i = start_page; i <= end_page; i++)
+    {
+        OLED_WR_CMD(0xB0 + i); // 设置页地址
+        OLED_WR_CMD(0x00);     // 列低地址
+        OLED_WR_CMD(0x10);     // 列高地址
+
+        for (n = 0; n < 128; n++)
+            OLED_WR_DATA(0x00); // 清空数据
+    }
+}
+
+/**
  * @function: void OLED_Display_On(void)
  * @description: 开启OLED显示
  * @return {*}

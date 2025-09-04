@@ -9,6 +9,7 @@ void OLED_WR_CMD(uint8_t cmd);
 void OLED_WR_DATA(uint8_t data);
 void OLED_Init(void);
 void OLED_Clear(void);
+void OLED_ClearRows(uint8_t start_page, uint8_t end_page);
 void OLED_Display_On(void);
 void OLED_Display_Off(void);
 void OLED_Set_Pos(uint8_t x, uint8_t y);
