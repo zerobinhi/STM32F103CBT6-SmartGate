@@ -1,2 +1,2 @@
-﻿  FM225.cpp
-C:\Users\Administrator\Documents\GitHub\STM32F103CBT6-SmartGate\FM225\FM225\FM225\FM225.cpp(107,3): error C2065: “ID”: 未声明的标识符
+﻿  FM225.c
+  FM225.vcxproj -> C:\Users\Administrator\Documents\GitHub\STM32F103CBT6-SmartGate\FM225\FM225\x64\Debug\FM225.exe
