@@ -25,7 +25,6 @@
 #include "tim.h"
 #include "usart.h"
 
-
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "fm225.h"
@@ -282,7 +281,6 @@ int menu_enroll() {
       // 调用函数计算 BCC 校验码
       TX_BUFFER[40] = calculateBCC(&TX_BUFFER[2], 38);
       HAL_UART_Transmit_DMA(&huart1, (uint8_t *)TX_BUFFER, 41);
-      HAL_UARTEx_ReceiveToIdle_DMA(&huart1, (uint8_t *)RX_BUFFER, RX_BUFF_SIZE);
       while (1) {
         if ((RX_BUFFER[2] == 0X00) && (RX_BUFFER[5] == 0X1D) &&
             (RX_BUFFER[6] == 0X0A)) {
@@ -330,10 +328,10 @@ int menu_enroll() {
           // 关闭FM225的电源
           HAL_GPIO_WritePin(FM225_CTL_GPIO_Port, FM225_CTL_Pin, GPIO_PIN_RESET);
           OLED_ClearRows(2, 7); // 清空2~7行
-          OLED_ShowCHinese(32, 0, 30, 0);
-          OLED_ShowCHinese(48, 0, 31, 0);
-          OLED_ShowCHinese(64, 0, 25, 0);
-          OLED_ShowCHinese(80, 0, 26, 0);
+          OLED_ShowCHinese(32, 2, 30, 0);
+          OLED_ShowCHinese(48, 2, 31, 0);
+          OLED_ShowCHinese(64, 2, 25, 0);
+          OLED_ShowCHinese(80, 2, 26, 0);
 
           while (1) {
             if (KEY3_PRESSED == 1) {
@@ -364,10 +362,10 @@ int menu_enroll() {
           // 关闭FM225的电源
           HAL_GPIO_WritePin(FM225_CTL_GPIO_Port, FM225_CTL_Pin, GPIO_PIN_RESET);
           OLED_ClearRows(2, 7); // 清空2~7行
-          OLED_ShowCHinese(32, 0, 30, 0);
-          OLED_ShowCHinese(48, 0, 31, 0);
-          OLED_ShowCHinese(64, 0, 27, 0);
-          OLED_ShowCHinese(80, 0, 28, 0);
+          OLED_ShowCHinese(32, 2, 30, 0);
+          OLED_ShowCHinese(48, 2, 31, 0);
+          OLED_ShowCHinese(64, 2, 27, 0);
+          OLED_ShowCHinese(80, 2, 28, 0);
 
           while (1) {
             if (KEY3_PRESSED == 1) {
@@ -442,18 +440,26 @@ int menu_verify() {
 
     // 调用验证函数
     face_verify(0x01, 10);
-    HAL_UARTEx_ReceiveToIdle_DMA(&huart1, (uint8_t *)RX_BUFFER, RX_BUFF_SIZE);
+
+    while (verify_received_data(user_buffer, user_buffer_len) == false) {
+      continue;
+    }
 
     while (1) {
-      if (RX_BUFFER[2] == 0X00 && RX_BUFFER[5] == 0X12 &&
-          RX_BUFFER[6] == 0X00 && RX_BUFFER[8] != 0X00) {
+      if (user_buffer[2] == 0X00 && user_buffer[5] == 0X12 &&
+          user_buffer[6] == 0X00 && user_buffer[8] != 0X00) {
+
+        // 重置 user_buffer 和 user_buffer_len
+        user_buffer_len = 0;
+        memset(user_buffer, 0x00, sizeof(user_buffer));
+
         // 播放验证成功语音
         HAL_GPIO_WritePin(IO5_GPIO_Port, IO5_Pin, GPIO_PIN_RESET);
         __HAL_TIM_SET_COUNTER(&htim2, 0);
         HAL_TIM_Base_Start_IT(&htim2);
-        
-        uint8_t id = RX_BUFFER[8];
-        OLED_ShowNum(72, 2, RX_BUFFER[8], 2, 16, 0);
+
+        uint8_t id = user_buffer[8];
+        OLED_ShowNum(72, 2, user_buffer[8], 2, 16, 0);
         HAL_GPIO_WritePin(IO6_GPIO_Port, IO6_Pin, GPIO_PIN_RESET);
         HAL_GPIO_WritePin(FM225_CTL_GPIO_Port, FM225_CTL_Pin, GPIO_PIN_RESET);
         OLED_ClearRows(2, 7);           // 清空2~7行
@@ -468,8 +474,13 @@ int menu_verify() {
         OLED_ShowNum(72, 4, id, 2, 16, 0);
         OLED_ShowCHinese(88, 4, 42, 0); // 个
       }
-      if (RX_BUFFER[2] == 0X00 && RX_BUFFER[5] == 0X12 &&
-          RX_BUFFER[6] == 0X0D) {
+      if (user_buffer[2] == 0X00 && user_buffer[5] == 0X12 &&
+          user_buffer[6] == 0X0D) {
+
+        // 重置 user_buffer 和 user_buffer_len
+        user_buffer_len = 0;
+        memset(user_buffer, 0x00, sizeof(user_buffer));
+
         // 播放验证失败语音
         HAL_GPIO_WritePin(IO6_GPIO_Port, IO6_Pin, GPIO_PIN_RESET);
         __HAL_TIM_SET_COUNTER(&htim2, 0);
@@ -478,10 +489,10 @@ int menu_verify() {
         HAL_GPIO_WritePin(IO7_GPIO_Port, IO7_Pin, GPIO_PIN_RESET);
         HAL_GPIO_WritePin(FM225_CTL_GPIO_Port, FM225_CTL_Pin, GPIO_PIN_RESET);
         OLED_ClearRows(2, 7); // 清空2~7行
-        OLED_ShowCHinese(32, 0, 4, 0);
-        OLED_ShowCHinese(48, 0, 5, 0);
-        OLED_ShowCHinese(64, 0, 27, 0);
-        OLED_ShowCHinese(80, 0, 28, 0);
+        OLED_ShowCHinese(32, 2, 4, 0);
+        OLED_ShowCHinese(48, 2, 5, 0);
+        OLED_ShowCHinese(64, 2, 27, 0);
+        OLED_ShowCHinese(80, 2, 28, 0);
       }
       if (KEY2_PRESSED == 1) {
         KEY2_PRESSED = 0;
@@ -505,21 +516,21 @@ int menu_verify() {
 int menu_delete() {
 
   OLED_ClearRows(2, 7); // 清空2~7行
-  OLED_ShowCHinese(0, 0, 13, 0);
-  OLED_ShowCHinese(16, 0, 14, 0);
-  OLED_ShowCHinese(32, 0, 15, 0);
-  OLED_ShowCHinese(48, 0, 16, 0);
+  OLED_ShowCHinese(0, 2, 13, 0);
+  OLED_ShowCHinese(16, 2, 14, 0);
+  OLED_ShowCHinese(32, 2, 15, 0);
+  OLED_ShowCHinese(48, 2, 16, 0);
 
-  OLED_ShowCHinese(64, 0, 2, 0);
-  OLED_ShowCHinese(80, 0, 3, 0);
-  OLED_ShowCHinese(96, 0, 6, 0);
-  OLED_ShowCHinese(112, 0, 7, 0);
+  OLED_ShowCHinese(64, 2, 2, 0);
+  OLED_ShowCHinese(80, 2, 3, 0);
+  OLED_ShowCHinese(96, 2, 6, 0);
+  OLED_ShowCHinese(112, 2, 7, 0);
 
-  OLED_ShowCHinese(24, 2, 39, 0);
-  OLED_ShowCHinese(40, 2, 40, 0);
-  OLED_ShowCHinese(56, 2, 41, 0);
-  OLED_ShowNum(72, 2, DELETE_ID, 2, 16, 0);
-  OLED_ShowCHinese(88, 2, 42, 0);
+  OLED_ShowCHinese(24, 4, 39, 0);
+  OLED_ShowCHinese(40, 4, 40, 0);
+  OLED_ShowCHinese(56, 4, 41, 0);
+  OLED_ShowNum(72, 4, DELETE_ID, 2, 16, 0);
+  OLED_ShowCHinese(88, 4, 42, 0);
   HAL_GPIO_WritePin(FM225_CTL_GPIO_Port, FM225_CTL_Pin, GPIO_PIN_SET);
 
   while (1) {
@@ -532,12 +543,12 @@ int menu_delete() {
 
       if (DELETE_ID == 0) {
         OLED_ClearRows(2, 7); // 清空2~7行
-        OLED_ShowCHinese(16, 0, 37, 0);
-        OLED_ShowCHinese(32, 0, 38, 0);
-        OLED_ShowCHinese(48, 0, 2, 0);
-        OLED_ShowCHinese(64, 0, 3, 0);
-        OLED_ShowCHinese(80, 0, 25, 0);
-        OLED_ShowCHinese(96, 0, 26, 0);
+        OLED_ShowCHinese(16, 2, 37, 0);
+        OLED_ShowCHinese(32, 2, 38, 0);
+        OLED_ShowCHinese(48, 2, 2, 0);
+        OLED_ShowCHinese(64, 2, 3, 0);
+        OLED_ShowCHinese(80, 2, 25, 0);
+        OLED_ShowCHinese(96, 2, 26, 0);
 
         TX_BUFFER[0] = 0XEF;
         TX_BUFFER[1] = 0XAA;
@@ -552,10 +563,10 @@ int menu_delete() {
 
       } else {
         OLED_ClearRows(2, 7); // 清空2~7行
-        OLED_ShowCHinese(32, 0, 2, 0);
-        OLED_ShowCHinese(48, 0, 3, 0);
-        OLED_ShowCHinese(64, 0, 25, 0);
-        OLED_ShowCHinese(80, 0, 26, 0);
+        OLED_ShowCHinese(32, 2, 2, 0);
+        OLED_ShowCHinese(48, 2, 3, 0);
+        OLED_ShowCHinese(64, 2, 25, 0);
+        OLED_ShowCHinese(80, 2, 26, 0);
 
         TX_BUFFER[0] = 0XEF;
         TX_BUFFER[1] = 0XAA;
@@ -686,10 +697,18 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 // UART接收事件回调函数
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
   if (huart->Instance == USART1) {
-    HAL_UART_DMAStop(&huart1); // 停止DMA传输
-    memset((uint8_t *)RX_BUFFER, 0X00, sizeof(RX_BUFFER));
-    HAL_UARTEx_ReceiveToIdle_DMA(&huart1, (uint8_t *)RX_BUFFER,
-                                 RX_BUFF_SIZE); // 继续接收数据
+
+    HAL_UART_DMAStop(&huart1);
+
+    // 保存数据
+    memcpy(user_buffer, RX_BUFFER, Size);
+
+    user_buffer_len = Size;
+
+    // 再清空
+    memset(RX_BUFFER, 0x00, sizeof(RX_BUFFER));
+
+    HAL_UARTEx_ReceiveToIdle_DMA(&huart1, RX_BUFFER, RX_BUFF_SIZE);
   }
 }
 // RTC秒中断回调函数

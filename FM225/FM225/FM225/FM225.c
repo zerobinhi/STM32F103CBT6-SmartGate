@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdbool.h>
 
-// #define DEBUG
+ #define DEBUG
 
 // 宏定义常量
 #define BCC_START_INDEX 2  // 校验码计算起始索引（跳过帧头2字节，从指令码开始）
@@ -72,10 +72,10 @@ static uint8_t calculate_bcc(const uint8_t *frame_data, uint16_t frame_len)
  * @param data_len  实际接收的字节数（需准确反映recv_data中有效数据的长度）
  * @return bool     校验结果：true=数据有效（帧结构+校验码均正确），false=数据无效
  */
-static bool verify_received_data(const uint8_t *recv_data, uint16_t data_len)
+static bool verify_received_data(const uint8_t* recv_data, uint16_t data_len)
 {
-    // 基础合法性检查：空指针或长度不足最小帧长，直接判定无效
-    if (recv_data == NULL)
+    // 基础合法性检查：空指针或长度为零，直接判定无效
+    if (recv_data == NULL|| data_len == 0)
     {
 #ifdef DEBUG
         printf("数据校验失败：数据为空\n");
@@ -454,6 +454,10 @@ void test_bcc_verification()
     printf("测试4-长度不足: %s\n",
            !verify_received_data(short_frame, sizeof(short_frame)) ? "通过" : "失败");
 
+	uint8_t empty_frame[64] = { 0 }; // 空数据帧
+    printf("测试5-空数据帧: %s\n",
+		!verify_received_data(empty_frame, 0) ? "通过" : "失败");
+
     printf("=== BCC校验与数据验证测试结束 ===\n\n");
 }
 
@@ -466,8 +470,8 @@ int main()
 {
     printf("=== FM225 人脸识别模块驱动测试程序启动 ===\n");
 
-    // 测试BCC校验功能（如需测试校验逻辑，可解注释此行）
-    // test_bcc_verification();
+    // 测试BCC校验功能
+     test_bcc_verification();
 
     // 测试人脸注册功能（管理员用户，用户名为"Admin001"，朝上方向，单帧录入，禁止重复，超时10秒）
     uint8_t admin_name[32] = "Admin001"; // 剩下的会自动补0

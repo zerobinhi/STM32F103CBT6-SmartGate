@@ -28,6 +28,9 @@
 
 extern uint8_t TX_BUFFER[TX_BUFF_SIZE];
 extern uint8_t RX_BUFFER[RX_BUFF_SIZE];
+extern uint8_t user_buffer[RX_BUFF_SIZE];
+extern uint8_t user_buffer_len;
+
 extern UART_HandleTypeDef huart1;
 
 // 函数声明

@@ -4,9 +4,10 @@
 // 帧头常量定义
 static const uint8_t FRAME_HEADER[2] = {0xEF, 0xAA};
 
-uint8_t TX_BUFFER[TX_BUFF_SIZE] = {0}; // 发送缓冲区
-uint8_t RX_BUFFER[RX_BUFF_SIZE] = {0}; // 接收缓冲区
-
+uint8_t TX_BUFFER[TX_BUFF_SIZE] = {0};   // 发送缓冲区
+uint8_t RX_BUFFER[RX_BUFF_SIZE] = {0};   // 接收缓冲区
+uint8_t user_buffer[RX_BUFF_SIZE] = {0}; // 用户数据缓冲区
+uint8_t user_buffer_len = 0;             // 用户数据长度
 
 // 全局常量：合法的人脸录入方向列表（用于参数合法性校验，避免无效值传入）
 const uint8_t VALID_FACE_DIRS[] = {
@@ -47,8 +48,8 @@ static uint8_t calculate_bcc(const uint8_t *frame_data, uint16_t frame_len) {
  * @return bool 校验结果：true=数据有效（帧结构+校验码均正确），false=数据无效
  */
 bool verify_received_data(const uint8_t *recv_data, uint16_t data_len) {
-  // 基础合法性检查：空指针或长度不足最小帧长，直接判定无效
-  if (recv_data == NULL) {
+  // 基础合法性检查：空指针或长度为零，直接判定无效
+  if (recv_data == NULL || data_len == 0) {
     return false;
   }
 
