@@ -29,6 +29,7 @@
 /* USER CODE BEGIN Includes */
 #include "fm225.h"
 #include "oled.h"
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -436,11 +437,18 @@ int menu_verify() {
     OLED_ShowCHinese(56, 2, 21, 0); // 近
     OLED_ShowCHinese(72, 2, 22, 0); // 设
     OLED_ShowCHinese(88, 2, 23, 0); // 备
-    HAL_Delay(100);
+
+    uint8_t ready_msg[7] = {0XEF, 0XAA, 0X01, 0X00, 0X01, 0X00,  0X00};
+
+    // 等待收到开机准备好的消息
+    while (strcmp((const char *)user_buffer, (const char *)ready_msg) != 0) {
+      continue;
+    }
 
     // 调用验证函数
     face_verify(0x01, 10);
 
+    // 等待收到验证结果
     while (verify_received_data(user_buffer, user_buffer_len) == false) {
       continue;
     }
@@ -489,10 +497,10 @@ int menu_verify() {
         HAL_GPIO_WritePin(IO7_GPIO_Port, IO7_Pin, GPIO_PIN_RESET);
         HAL_GPIO_WritePin(FM225_CTL_GPIO_Port, FM225_CTL_Pin, GPIO_PIN_RESET);
         OLED_ClearRows(2, 7); // 清空2~7行
-        OLED_ShowCHinese(32, 2, 4, 0);
-        OLED_ShowCHinese(48, 2, 5, 0);
-        OLED_ShowCHinese(64, 2, 27, 0);
-        OLED_ShowCHinese(80, 2, 28, 0);
+        OLED_ShowCHinese(32, 2, 4, 0); // 验
+        OLED_ShowCHinese(48, 2, 5, 0); // 证
+        OLED_ShowCHinese(64, 2, 27, 0); // 失
+        OLED_ShowCHinese(80, 2, 28, 0); // 败
       }
       if (KEY2_PRESSED == 1) {
         KEY2_PRESSED = 0;
@@ -516,21 +524,21 @@ int menu_verify() {
 int menu_delete() {
 
   OLED_ClearRows(2, 7); // 清空2~7行
-  OLED_ShowCHinese(0, 2, 13, 0);
-  OLED_ShowCHinese(16, 2, 14, 0);
-  OLED_ShowCHinese(32, 2, 15, 0);
-  OLED_ShowCHinese(48, 2, 16, 0);
+  OLED_ShowCHinese(0, 2, 13, 0); // 再
+  OLED_ShowCHinese(16, 2, 14, 0); // 按
+  OLED_ShowCHinese(32, 2, 15, 0); // 一
+  OLED_ShowCHinese(48, 2, 16, 0); // 次
 
-  OLED_ShowCHinese(64, 2, 2, 0);
-  OLED_ShowCHinese(80, 2, 3, 0);
-  OLED_ShowCHinese(96, 2, 6, 0);
-  OLED_ShowCHinese(112, 2, 7, 0);
+  OLED_ShowCHinese(64, 2, 2, 0); // 删
+  OLED_ShowCHinese(80, 2, 3, 0); // 除
+  OLED_ShowCHinese(96, 2, 6, 0); // 人
+  OLED_ShowCHinese(112, 2, 7, 0); // 脸
 
-  OLED_ShowCHinese(24, 4, 39, 0);
-  OLED_ShowCHinese(40, 4, 40, 0);
-  OLED_ShowCHinese(56, 4, 41, 0);
+  OLED_ShowCHinese(24, 4, 39, 0); // 库
+  OLED_ShowCHinese(40, 4, 40, 0); // 中
+  OLED_ShowCHinese(56, 4, 41, 0); // 第
   OLED_ShowNum(72, 4, DELETE_ID, 2, 16, 0);
-  OLED_ShowCHinese(88, 4, 42, 0);
+  OLED_ShowCHinese(88, 4, 42, 0); // 个
   HAL_GPIO_WritePin(FM225_CTL_GPIO_Port, FM225_CTL_Pin, GPIO_PIN_SET);
 
   while (1) {
@@ -617,14 +625,14 @@ int menu_delete() {
       KEY3_PRESSED = 0;
       if (DELETE_ID < 99) {
         DELETE_ID++;
-        OLED_ShowNum(72, 2, DELETE_ID, 2, 16, 0);
+        OLED_ShowNum(72, 4, DELETE_ID, 2, 16, 0);
       }
     }
     if (KEY2_PRESSED == 1) {
       KEY2_PRESSED = 0;
       if (DELETE_ID > 0) {
         DELETE_ID--;
-        OLED_ShowNum(72, 2, DELETE_ID, 2, 16, 0);
+        OLED_ShowNum(72, 4, DELETE_ID, 2, 16, 0);
       }
     }
     if (KEY1_PRESSED == 1) {
