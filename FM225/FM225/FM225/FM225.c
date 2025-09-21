@@ -22,6 +22,7 @@
 #define CMD_DELETE_FACE 0x21 // 删除所有人脸命令
 #define CMD_VERIFY_FACE 0x12 // 验证人脸命令
 #define CMD_RESET_FACE 0x10  // 终止操作命令
+#define CMD_DELETE_USER 0x20  // 删除指定用户命令
 
 // 帧头常量定义
 static const uint8_t FRAME_HEADER[2] = {0xEF, 0xAA};
@@ -114,6 +115,65 @@ static bool verify_received_data(const uint8_t* recv_data, uint16_t data_len)
 }
 
 // ========================== 功能函数 ==========================
+/**
+ * @brief 删除指定用户的人脸数据
+ * @param 待删除用户的ID
+ * @return true: 命令帧构建成功且发送成功；false: 帧构建失败或发送失败
+ */
+static bool face_delete_user(uint16_t id)
+{ 
+	// 验证ID的合法性：ID范围为1~100
+    if (id < 1 || id > 100)
+	{
+        #ifdef DEBUG
+		printf("删除失败：用户ID无效（需1~100，实际%d）\n", id);
+        #endif
+        return false;
+	}
+
+    // 构建删除命令帧：初始化全0，避免未赋值字节的随机值影响校验
+    uint8_t frame[8] = { 0 };
+
+    // 填充帧头（2字节）：固定为FRAME_HEADER，模块识别数据帧的起始标识
+    frame[0] = FRAME_HEADER[0];
+    frame[1] = FRAME_HEADER[1];
+
+    // 填充指令码（1字节）：删除指定用户命令CMD_DELETE_USER
+    frame[2] = CMD_DELETE_USER;
+
+    // 填充数据长度（2字节，高字节在前）
+    frame[3] = 0x00; // 数据长度高8位
+    frame[4] = 0x02; // 数据长度低8位
+
+	// 填充附加数据（2字节）：按模块协议顺序排列
+	frame[5] = (id >> 8) & 0xFF; // 第1字节：用户ID高8位
+	frame[6] = id & 0xFF;        // 第2字节：用户ID低8位
+
+    // 计算并填充BCC校验码（1字节，帧尾）：基于整个帧的前5字节计算
+    frame[7] = calculate_bcc(frame, sizeof(frame));
+
+    // 调试模式：打印发送的命令帧详情（便于排查帧结构是否正确）
+#ifdef DEBUG
+    printf("发送删除指定脸帧（共%d字节）：", (uint16_t)sizeof(frame));
+    for (size_t i = 0; i < sizeof(frame); ++i)
+    {
+        printf("%02X ", frame[i]);
+    }
+    printf("\n");
+#endif
+
+    // 实际串口发送逻辑：需根据硬件平台实现UART_Send函数
+    // 示例：
+    // if (!UART_Send(frame, sizeof(frame)))
+    // {
+    //     printf("删除失败：串口发送命令帧失败\n");
+    //     return false;
+    // }
+
+    // 调试模式下，帧构建成功即返回true（实际需结合串口发送结果）
+    return true;
+}
+
 /**
  * @brief 删除人脸识别模块中存储的所有人脸数据（清空用户库，需谨慎调用）
  * @param 无输入参数（功能固定为删除全部，无需额外配置）
@@ -290,7 +350,6 @@ static bool face_verify(uint8_t pd_rightaway, uint8_t timeout)
  * @param enable_duplicate 是否允许重复录入（0x00=禁止重复，0x01=允许重复，仅2个有效值）
  * @param timeout         录入超时时间（单位：秒）：0→默认10秒，1~60→实际值，>60→强制60秒
  * @return true: 命令帧构建成功且发送成功；false: 参数无效或发送失败
- * @note  管理员用户拥有删除其他用户的权限，普通用户仅拥有验证权限
  */
 static bool face_enroll(uint8_t admin, const uint8_t user_name[32], uint8_t face_direction,
                         uint8_t enroll_type, uint8_t enable_duplicate, uint8_t timeout)
@@ -485,6 +544,9 @@ int main()
 
     // 测试终止操作功能
     face_reset();
+
+	// 测试删除指定用户功能（删除ID为5的用户）
+	face_delete_user(5);
 
     printf("=== FM225 人脸识别模块驱动测试程序结束 ===\n");
     return 0;

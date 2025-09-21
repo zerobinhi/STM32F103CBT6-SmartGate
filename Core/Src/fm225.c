@@ -13,6 +13,7 @@ uint8_t user_buffer_len = 0;             // 用户数据长度
 const uint8_t VALID_FACE_DIRS[] = {
     FACE_DIRECTION_UP,    FACE_DIRECTION_DOWN,   FACE_DIRECTION_LEFT,
     FACE_DIRECTION_RIGHT, FACE_DIRECTION_MIDDLE, FACE_DIRECTION_UNDEFINED};
+
 // 全局常量：合法人脸方向的数量（避免循环中重复计算sizeof）
 const size_t VALID_FACE_DIR_CNT =
     sizeof(VALID_FACE_DIRS) / sizeof(VALID_FACE_DIRS[0]);
@@ -72,6 +73,45 @@ bool verify_received_data(const uint8_t *recv_data, uint16_t data_len) {
 }
 
 // ========================== 功能函数 ==========================
+/**
+ * @brief 删除指定用户的人脸数据
+ * @param 待删除用户的ID
+ * @return true: 命令帧构建成功且发送成功；false: 帧构建失败或发送失败
+ */
+bool face_delete_user(uint16_t id) {
+  // 验证ID的合法性：ID范围为1~100
+  if (id < 1 || id > 100) {
+    return false;
+  }
+
+  // 构建删除命令帧：初始化全0，避免未赋值字节的随机值影响校验
+  uint8_t frame[64] = {0};
+
+  // 填充帧头（2字节）：固定为FRAME_HEADER，模块识别数据帧的起始标识
+  frame[0] = FRAME_HEADER[0];
+  frame[1] = FRAME_HEADER[1];
+
+  // 填充指令码（1字节）：删除指定用户命令CMD_DELETE_USER
+  frame[2] = CMD_DELETE_USER;
+
+  // 填充数据长度（2字节，高字节在前）
+  frame[3] = 0x00; // 数据长度高8位
+  frame[4] = 0x02; // 数据长度低8位
+
+  // 填充附加数据（2字节）：按模块协议顺序排列
+  frame[5] = (id >> 8) & 0xFF; // 第1字节：用户ID高8位
+  frame[6] = id & 0xFF;        // 第2字节：用户ID低8位
+
+  // 计算并填充BCC校验码（1字节，帧尾）：基于整个帧的前5字节计算
+  frame[7] = calculate_bcc(frame, sizeof(frame));
+
+  // 实际的串口发送逻辑
+  if (HAL_UART_Transmit_DMA(&huart1, (uint8_t *)frame, sizeof(frame)) !=
+      HAL_OK) {
+    return false;
+  }
+  return true;
+}
 /**
  * @brief 删除人脸识别模块中存储的所有人脸数据（清空用户库，需谨慎调用）
  * @param 无输入参数（功能固定为删除全部，无需额外配置）
@@ -199,7 +239,6 @@ bool face_verify(uint8_t pd_rightaway, uint8_t timeout) {
  * @param timeout
  * 录入超时时间（单位：秒）：0→默认10秒，1~60→实际值，>60→强制60秒
  * @return true: 命令帧构建成功且发送成功；false: 参数无效或发送失败
- * @note  管理员用户拥有删除其他用户的权限，普通用户仅拥有验证权限
  */
 bool face_enroll(uint8_t admin, const uint8_t user_name[32],
                  uint8_t face_direction, uint8_t enroll_type,
@@ -242,15 +281,8 @@ bool face_enroll(uint8_t admin, const uint8_t user_name[32],
     timeout = 60; // >60→强制60秒
   }
 
-  // 清理用户名（确保严格符合32字节长度，不足补0，不修改原输入）
-  uint8_t clean_name[32] = {0}; // 临时缓冲区，默认全0（自动补0）
-  // 安全拷贝32字节（无论原用户名是否以'\0'结尾，均不会越界）
-  memcpy(clean_name, user_name, 32);
-
-  // 调试模式：打印最终生效的注册参数（便于确认配置）
-
   // 构建注册命令帧：初始化全0，避免未赋值字节的随机值影响校验
-  uint8_t frame[64] = {0};
+  uint8_t frame[128] = {0};
 
   // 填充帧头（2字节）：固定起始标识
   frame[0] = FRAME_HEADER[0];
@@ -264,19 +296,22 @@ bool face_enroll(uint8_t admin, const uint8_t user_name[32],
   frame[4] = 0x28; // 数据长度低8位（0x0028 = 40字节）
 
   // 填充附加数据（40字节，严格按模块协议顺序排列）
-  frame[5] = admin;                  // 第1字节：管理员标识
-  memcpy(&frame[6], clean_name, 32); // 第2-33字节：32字节用户名（索引6-37）
-  frame[38] = face_direction;        // 第34字节：人脸录入方向（索引38）
-  frame[39] = enroll_type;           // 第35字节：注册类型（索引39）
-  frame[40] = enable_duplicate;      // 第36字节：重复录入控制（索引40）
-  frame[41] = timeout;               // 第37字节：录入超时时间（索引41）
+  frame[5] = admin; // 第1字节：管理员标识
+  for (int i = 0; i < 32; i++) {
+    frame[6 + i] = user_name[i]; // 第2-33字节：32字节用户名（索引6-37）
+  }
+  frame[38] = face_direction;   // 第34字节：人脸录入方向（索引38）
+  frame[39] = enroll_type;      // 第35字节：注册类型（索引39）
+  frame[40] = enable_duplicate; // 第36字节：重复录入控制（索引40）
+  frame[41] = timeout;          // 第37字节：录入超时时间（索引41）
   // 第38-40字节：预留位（3字节，索引42-44），已初始化为0，无需额外赋值
 
   // 计算并填充BCC校验码（1字节，帧尾）：基于前45字节计算
   frame[45] = calculate_bcc(frame, 46);
 
   // 实际串口发送逻辑
-  if (HAL_UART_Transmit_DMA(&huart1, (uint8_t *)frame, 46) != HAL_OK) {
+  if (HAL_UART_Transmit_DMA(&huart1, (uint8_t *)frame, sizeof(frame)) !=
+      HAL_OK) {
     return false;
   }
 

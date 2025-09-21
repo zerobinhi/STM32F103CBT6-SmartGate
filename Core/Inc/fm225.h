@@ -7,7 +7,8 @@
 
 // 宏定义常量
 #define BCC_START_INDEX 2 // 校验码计算起始索引（跳过帧头2字节，从指令码开始）
-#define MIN_FRAME_LENGTH 6 // 最小帧长度（字节）：帧头2字节 + 指令1字节 + 数据长度2字节 + BCC1字节
+#define MIN_FRAME_LENGTH                                                       \
+  6 // 最小帧长度（字节）：帧头2字节 + 指令1字节 + 数据长度2字节 + BCC1字节
 
 // 录入方向定义（覆盖所有支持的人脸朝向，未定义时默认正向）
 #define FACE_DIRECTION_UP 0x10        // 录入朝上的人脸
@@ -22,6 +23,7 @@
 #define CMD_DELETE_FACE 0x21 // 删除所有人脸命令
 #define CMD_VERIFY_FACE 0x12 // 验证人脸命令
 #define CMD_RESET_FACE 0x10  // 终止操作命令
+#define CMD_DELETE_USER 0x20 // 删除指定用户命令
 
 #define RX_BUFF_SIZE 128
 #define TX_BUFF_SIZE 64
@@ -41,5 +43,6 @@ bool face_enroll(uint8_t admin, const uint8_t user_name[32],
 bool face_delete_all();
 bool face_verify(uint8_t pd_rightaway, uint8_t timeout);
 bool face_reset();
+bool face_delete_user(uint16_t id);
 
 #endif /* FM225_H_ */
