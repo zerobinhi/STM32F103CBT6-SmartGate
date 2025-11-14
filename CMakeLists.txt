@@ -47,7 +47,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
     ${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/fm225.c
     ${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/oled.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/oledfont.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/oled_font.c
 )
 
 # Add include paths

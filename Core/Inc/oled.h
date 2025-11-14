@@ -1,32 +1,41 @@
-#ifndef OLED_OLED_H_
-#define OLED_OLED_H_
+#ifndef OLED_H_
+#define OLED_H_
 
-#include "stm32f1xx_hal.h"
-#include "oledfont.h"
-extern I2C_HandleTypeDef  hi2c1;
-
-void OLED_WR_CMD(uint8_t cmd);
-void OLED_WR_DATA(uint8_t data);
-void OLED_Init(void);
-void OLED_Clear(void);
-void OLED_ClearRows(uint8_t start_page, uint8_t end_page);
-void OLED_Display_On(void);
-void OLED_Display_Off(void);
-void OLED_Set_Pos(uint8_t x, uint8_t y);
-void OLED_On(void);
-void OLED_ShowNum(uint8_t x,uint8_t y,unsigned int num,uint8_t len,uint8_t size2,uint8_t Color_Turn);
-void OLED_Showdecimal(uint8_t x,uint8_t y,float num,uint8_t z_len,uint8_t f_len,uint8_t size2, uint8_t Color_Turn);
-void OLED_ShowChar(uint8_t x,uint8_t y,uint8_t chr,uint8_t Char_Size,uint8_t Color_Turn);
-void OLED_ShowString(uint8_t x,uint8_t y,char*chr,uint8_t Char_Size,uint8_t Color_Turn);
-void OLED_ShowCHinese(uint8_t x,uint8_t y,uint8_t no,uint8_t Color_Turn);
-void OLED_DrawBMP(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, uint8_t *  BMP,uint8_t Color_Turn);
-void OLED_HorizontalShift(uint8_t direction);
-void OLED_Some_HorizontalShift(uint8_t direction,uint8_t start,uint8_t end);
-void OLED_VerticalAndHorizontalShift(uint8_t direction);
-void OLED_DisplayMode(uint8_t mode);
-void OLED_IntensityControl(uint8_t intensity);
+#include "oled_font.h"
+#include <stdbool.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 
+#define OLED_I2C_ADDR (0x3C << 1) // 默认 0x78
 
-#endif /* OLED_OLED_H_ */
+#define OLED_WIDTH 128
+#define OLED_HEIGHT 64
 
+extern I2C_HandleTypeDef hi2c1;
+
+/* 初始化与控制 */
+HAL_StatusTypeDef OLED_Init(); // 初始化寄存器
+
+/* 显存操作 */
+HAL_StatusTypeDef OLED_Refresh(); // 全屏刷新：按页发送
+void OLED_Clear(uint8_t color);    // 清屏或填充
+HAL_StatusTypeDef OLED_SetContrast(uint8_t contrast);
+HAL_StatusTypeDef OLED_InvertDisplay(bool invert);
+
+/* 基本绘制（写入显存） */
+void OLED_DrawPoint(uint8_t x, uint8_t y, uint8_t color);
+void OLED_DrawLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t color);
+void OLED_DrawRect(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t color);
+void OLED_FillRect(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t color);
+
+/* 文本/数字/小数/中文/位图（写入显存） */
+void OLED_ShowChar(uint8_t x, uint8_t y, char chr, uint8_t size, uint8_t color);
+void OLED_ShowString(uint8_t x, uint8_t y, const char *str, uint8_t size, uint8_t color);
+void OLED_ShowNum(uint8_t x, uint8_t y, int32_t num, uint8_t len, uint8_t size, uint8_t color);
+void OLED_ShowDecimal(uint8_t x, uint8_t y, float val, uint8_t z_len, uint8_t f_len, uint8_t size, uint8_t color);
+void OLED_ShowChinese(uint8_t x, uint8_t y, uint8_t no, uint8_t color);
+void OLED_DrawBitmap(uint8_t x, uint8_t y, const uint8_t *bmp, uint8_t w, uint8_t h, uint8_t color);
+
+#endif /* OLED_H_ */
