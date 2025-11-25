@@ -21,6 +21,7 @@
 #include "dma.h"
 #include "i2c.h"
 #include "rtc.h"
+#include "stm32f1xx_hal.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -118,8 +119,12 @@ int main(void)
   __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE); // 使能串口IDLE中断
   HAL_UARTEx_ReceiveToIdle_DMA(&huart1, (uint8_t *)RX_BUFFER, RX_BUFF_SIZE);
   HAL_TIM_Base_Start_IT(&htim1); // 按键消抖
-  OLED_Init();                   // OLED初始
-  HAL_Delay(100);
+
+  if (OLED_Init() != HAL_OK) // OLED初始化
+  {
+    Error_Handler();
+  }
+  OLED_ShowTime(); // 显示时间
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -212,57 +217,60 @@ uint8_t calculateBCC(uint8_t *data, int length) {
 
 int menu_main() {
   menu = NULL;
-  OLED_Clear(0); // 清空2~7行
+  OLED_FillRect(0, 16, 128, 64, 0); // 清空2~7行
 
-  OLED_ShowChinese(32, 2, 0, 0);
-  OLED_ShowChinese(48, 2, 1, 0);
-  OLED_ShowChinese(64, 2, 6, 0);
-  OLED_ShowChinese(80, 2, 7, 0);
+  OLED_ShowChinese(32, 16, 0, 0);
+  OLED_ShowChinese(48, 16, 1, 0);
+  OLED_ShowChinese(64, 16, 6, 0);
+  OLED_ShowChinese(80, 16, 7, 0);
 
-  OLED_ShowChinese(32, 4, 4, 0);
-  OLED_ShowChinese(48, 4, 5, 0);
-  OLED_ShowChinese(64, 4, 6, 0);
-  OLED_ShowChinese(80, 4, 7, 0);
+  OLED_ShowChinese(32, 32, 4, 0);
+  OLED_ShowChinese(48, 32, 5, 0);
+  OLED_ShowChinese(64, 32, 6, 0);
+  OLED_ShowChinese(80, 32, 7, 0);
 
-  OLED_ShowChinese(32, 6, 2, 0);
-  OLED_ShowChinese(48, 6, 3, 0);
-  OLED_ShowChinese(64, 6, 6, 0);
-  OLED_ShowChinese(80, 6, 7, 0);
+  OLED_ShowChinese(32, 48, 2, 0);
+  OLED_ShowChinese(48, 48, 3, 0);
+  OLED_ShowChinese(64, 48, 6, 0);
+  OLED_ShowChinese(80, 48, 7, 0);
+  OLED_Refresh();
   return 0;
 }
 int menu_enroll() {
-  OLED_Clear(0); // 清空2~7行
+  OLED_FillRect(0, 16, 128, 64, 0); // 清空2~7行
 
-  OLED_ShowChinese(0, 2, 8, 0);   // 再
-  OLED_ShowChinese(16, 2, 9, 0);  // 按
-  OLED_ShowChinese(32, 2, 10, 0); // 一
-  OLED_ShowChinese(48, 2, 11, 0); // 次
+  OLED_ShowChinese(0, 16, 8, 0);   // 再
+  OLED_ShowChinese(16, 16, 9, 0);  // 按
+  OLED_ShowChinese(32, 16, 10, 0); // 一
+  OLED_ShowChinese(48, 16, 11, 0); // 次
 
-  OLED_ShowChinese(64, 2, 0, 0);  // 注
-  OLED_ShowChinese(80, 2, 1, 0);  // 册
-  OLED_ShowChinese(96, 2, 6, 0);  // 人
-  OLED_ShowChinese(112, 2, 7, 0); // 脸
+  OLED_ShowChinese(64, 16, 0, 0);  // 注
+  OLED_ShowChinese(80, 16, 1, 0);  // 册
+  OLED_ShowChinese(96, 16, 6, 0);  // 人
+  OLED_ShowChinese(112, 16, 7, 0); // 脸
 
-  OLED_ShowChinese(32, 4, 12, 0); // 序
-  OLED_ShowChinese(48, 4, 13, 0); // 号
-  OLED_ShowChinese(64, 4, 14, 0); // ：
-  OLED_ShowNum(80, 4, g_user_name, 2, 16, 0);
+  OLED_ShowChinese(32, 32, 12, 0); // 序
+  OLED_ShowChinese(48, 32, 13, 0); // 号
+  OLED_ShowChinese(64, 32, 14, 0); // ：
+  OLED_ShowNum(80, 32, g_user_name, 2, 16, 0);
+  OLED_Refresh();
 
   while (1) {
     if (KEY3_PRESSED == 1) {
       KEY3_PRESSED = 0;
-      OLED_Clear(0); // 清空2~7行
+      OLED_FillRect(0, 16, 128, 64, 0); // 清空2~7行
 
-      OLED_ShowChinese(40, 2, 0, 0);  // 注
-      OLED_ShowChinese(56, 2, 1, 0);  // 册
-      OLED_ShowChinese(72, 2, 15, 0); // 中
+      OLED_ShowChinese(40, 16, 0, 0);  // 注
+      OLED_ShowChinese(56, 16, 1, 0);  // 册
+      OLED_ShowChinese(72, 16, 15, 0); // 中
 
-      OLED_ShowChinese(16, 4, 35, 0); // 设
-      OLED_ShowChinese(32, 4, 36, 0); // 备
-      OLED_ShowChinese(48, 4, 33, 0); // 正
-      OLED_ShowChinese(64, 4, 39, 0); // 在
-      OLED_ShowChinese(80, 4, 37, 0); // 连
-      OLED_ShowChinese(96, 4, 38, 0); // 接
+      OLED_ShowChinese(16, 32, 35, 0); // 设
+      OLED_ShowChinese(32, 32, 36, 0); // 备
+      OLED_ShowChinese(48, 32, 33, 0); // 正
+      OLED_ShowChinese(64, 32, 39, 0); // 在
+      OLED_ShowChinese(80, 32, 37, 0); // 连
+      OLED_ShowChinese(96, 32, 38, 0); // 接
+      OLED_Refresh();
 
       // 重置 user_buffer 和 user_buffer_len
       user_buffer_len = 0;
@@ -306,12 +314,13 @@ int menu_enroll() {
           user_buffer_len = 0;
           memset(user_buffer, 0x00, sizeof(user_buffer));
 
-          OLED_ShowChinese(16, 4, 29, 0); // 未
-          OLED_ShowChinese(32, 4, 30, 0); // 检
-          OLED_ShowChinese(48, 4, 31, 0); // 测
-          OLED_ShowChinese(64, 4, 32, 0); // 到
-          OLED_ShowChinese(80, 4, 6, 0);  // 人
-          OLED_ShowChinese(96, 4, 7, 0);  // 脸
+          OLED_ShowChinese(16, 48, 29, 0); // 未
+          OLED_ShowChinese(32, 48, 30, 0); // 检
+          OLED_ShowChinese(48, 48, 31, 0); // 测
+          OLED_ShowChinese(64, 48, 32, 0); // 到
+          OLED_ShowChinese(80, 48, 6, 0);  // 人
+          OLED_ShowChinese(96, 48, 7, 0);  // 脸
+          OLED_Refresh();
         }
         if (user_buffer[2] == 0X01 && user_buffer[3] == 0X00 &&
             user_buffer[4] == 0X11 && user_buffer[5] == 0X01 &&
@@ -322,10 +331,11 @@ int menu_enroll() {
 
           OLED_Clear(0);; // 清空4~5行
 
-          OLED_ShowChinese(32, 4, 6, 0);  // 人
-          OLED_ShowChinese(48, 4, 7, 0);  // 脸
-          OLED_ShowChinese(64, 4, 33, 0); // 正
-          OLED_ShowChinese(80, 4, 34, 0); // 常
+          OLED_ShowChinese(32, 48, 6, 0);  // 人
+          OLED_ShowChinese(48, 48, 7, 0);  // 脸
+          OLED_ShowChinese(64, 48, 33, 0); // 正
+          OLED_ShowChinese(80, 48, 34, 0); // 常
+          OLED_Refresh();
         }
         if ((user_buffer[2] == 0X00) && (user_buffer[5] == CMD_ENROLL_ITG) &&
             (user_buffer[6] == 0X0A)) {
@@ -338,13 +348,14 @@ int menu_enroll() {
 
           // 关闭FM225的电源
           HAL_GPIO_WritePin(FM225_CTL_GPIO_Port, FM225_CTL_Pin, GPIO_PIN_RESET);
-          OLED_Clear(0); // 清空2~7行
+          OLED_FillRect(0, 16, 128, 64, 0); // 清空2~7行
 
-          OLED_ShowChinese(24, 2, 6, 0);  // 人
-          OLED_ShowChinese(40, 2, 7, 0);  // 脸
-          OLED_ShowChinese(56, 2, 20, 0); // 已
-          OLED_ShowChinese(72, 2, 21, 0); // 录
-          OLED_ShowChinese(88, 2, 22, 0); // 入
+          OLED_ShowChinese(24, 32, 6, 0);  // 人
+          OLED_ShowChinese(40, 32, 7, 0);  // 脸
+          OLED_ShowChinese(56, 32, 20, 0); // 已
+          OLED_ShowChinese(72, 32, 21, 0); // 录
+          OLED_ShowChinese(88, 32, 22, 0); // 入
+          OLED_Refresh();
 
           while (1) {
             if (KEY3_PRESSED == 1) {
@@ -378,10 +389,11 @@ int menu_enroll() {
           // 关闭FM225的电源
           HAL_GPIO_WritePin(FM225_CTL_GPIO_Port, FM225_CTL_Pin, GPIO_PIN_RESET);
           OLED_Clear(0);           // 清空2~7行
-          OLED_ShowChinese(32, 2, 21, 0); // 录
-          OLED_ShowChinese(48, 2, 22, 0); // 入
-          OLED_ShowChinese(64, 2, 16, 0); // 成
-          OLED_ShowChinese(80, 2, 17, 0); // 功
+          OLED_ShowChinese(32, 32, 21, 0); // 录
+          OLED_ShowChinese(48, 32, 22, 0); // 入
+          OLED_ShowChinese(64, 32, 16, 0); // 成
+          OLED_ShowChinese(80, 32, 17, 0); // 功
+          OLED_Refresh();
 
           while (1) {
             if (KEY3_PRESSED == 1) {
@@ -414,11 +426,12 @@ int menu_enroll() {
 
           // 关闭FM225的电源
           HAL_GPIO_WritePin(FM225_CTL_GPIO_Port, FM225_CTL_Pin, GPIO_PIN_RESET);
-          OLED_Clear(0); // 清空2~7行
-          OLED_ShowChinese(32, 2, 21, 0);
-          OLED_ShowChinese(48, 2, 22, 0);
-          OLED_ShowChinese(64, 2, 18, 0);
-          OLED_ShowChinese(80, 2, 19, 0);
+          OLED_FillRect(0, 16, 128, 64, 0); // 清空2~7行
+          OLED_ShowChinese(32, 32, 21, 0);
+          OLED_ShowChinese(48, 32, 22, 0);
+          OLED_ShowChinese(64, 32, 18, 0);
+          OLED_ShowChinese(80, 32, 19, 0);
+          OLED_Refresh();
 
           while (1) {
             if (KEY3_PRESSED == 1) {
@@ -460,14 +473,16 @@ int menu_enroll() {
       KEY2_PRESSED = 0;
       if (g_user_name < 99) {
         g_user_name++;
-        OLED_ShowNum(80, 4, g_user_name, 2, 16, 0);
+        OLED_ShowNum(80, 32, g_user_name, 2, 16, 0);
+        OLED_Refresh();
       }
     }
     if (KEY0_PRESSED == 1) {
       KEY0_PRESSED = 0;
       if (g_user_name > 1) {
         g_user_name--;
-        OLED_ShowNum(80, 4, g_user_name, 2, 16, 0);
+        OLED_ShowNum(80, 32, g_user_name, 2, 16, 0);
+        OLED_Refresh();
       }
     }
     if (KEY1_PRESSED == 1) {
@@ -483,14 +498,15 @@ int menu_enroll() {
 int menu_verify() {
   while (1) {
 
-    OLED_Clear(0); // 清空2~7行
+    OLED_FillRect(0, 16, 128, 64, 0); // 清空2~7行
 
-    OLED_ShowChinese(16, 2, 35, 0); // 设
-    OLED_ShowChinese(32, 2, 36, 0); // 备
-    OLED_ShowChinese(48, 2, 33, 0); // 正
-    OLED_ShowChinese(64, 2, 39, 0); // 在
-    OLED_ShowChinese(80, 2, 37, 0); // 连
-    OLED_ShowChinese(96, 2, 38, 0); // 接
+    OLED_ShowChinese(16, 16, 35, 0); // 设
+    OLED_ShowChinese(32, 16, 36, 0); // 备
+    OLED_ShowChinese(48, 16, 33, 0); // 正
+    OLED_ShowChinese(64, 16, 39, 0); // 在
+    OLED_ShowChinese(80, 16, 37, 0); // 连
+    OLED_ShowChinese(96, 16, 38, 0); // 接
+    OLED_Refresh();
 
     // 重置 user_buffer 和 user_buffer_len
     user_buffer_len = 0;
@@ -532,12 +548,13 @@ int menu_verify() {
         user_buffer_len = 0;
         memset(user_buffer, 0x00, sizeof(user_buffer));
 
-        OLED_ShowChinese(16, 2, 29, 0); // 未
-        OLED_ShowChinese(32, 2, 30, 0); // 检
-        OLED_ShowChinese(48, 2, 31, 0); // 测
-        OLED_ShowChinese(64, 2, 32, 0); // 到
-        OLED_ShowChinese(80, 2, 6, 0);  // 人
-        OLED_ShowChinese(96, 2, 7, 0);  // 脸
+        OLED_ShowChinese(16, 32, 29, 0); // 未
+        OLED_ShowChinese(32, 32, 30, 0); // 检
+        OLED_ShowChinese(48, 32, 31, 0); // 测
+        OLED_ShowChinese(64, 32, 32, 0); // 到
+        OLED_ShowChinese(80, 32, 6, 0);  // 人
+        OLED_ShowChinese(96, 32, 7, 0);  // 脸
+        OLED_Refresh();
       }
       if (user_buffer[2] == 0X01 && user_buffer[3] == 0X00 &&
           user_buffer[4] == 0X11 && user_buffer[5] == 0X01 &&
@@ -548,10 +565,11 @@ int menu_verify() {
 
         OLED_Clear(0); // 清空2~3行
 
-        OLED_ShowChinese(32, 2, 6, 0);  // 人
-        OLED_ShowChinese(48, 2, 7, 0);  // 脸
-        OLED_ShowChinese(64, 2, 33, 0); // 正
-        OLED_ShowChinese(80, 2, 34, 0); // 常
+        OLED_ShowChinese(32, 32, 6, 0);  // 人
+        OLED_ShowChinese(48, 32, 7, 0);  // 脸
+        OLED_ShowChinese(64, 32, 33, 0); // 正
+        OLED_ShowChinese(80, 32, 34, 0); // 常
+        OLED_Refresh();
       }
 
       if (user_buffer[2] == 0X00 && user_buffer[5] == CMD_VERIFY_FACE &&
@@ -568,19 +586,21 @@ int menu_verify() {
         memset(user_buffer, 0x00, sizeof(user_buffer));
 
         uint8_t id = user_buffer[8];
-        OLED_ShowNum(72, 2, user_buffer[8], 2, 16, 0);
+        OLED_ShowNum(72, 16, user_buffer[8], 2, 16, 0);
+        OLED_Refresh();
 
         OLED_Clear(0);           // 清空2~3行
-        OLED_ShowChinese(32, 2, 2, 0);  // 验
-        OLED_ShowChinese(48, 2, 3, 0);  // 证
-        OLED_ShowChinese(64, 2, 16, 0); // 成
-        OLED_ShowChinese(80, 2, 17, 0); // 功
+        OLED_ShowChinese(32, 16, 2, 0);  // 验
+        OLED_ShowChinese(48, 16, 3, 0);  // 证
+        OLED_ShowChinese(64, 16, 16, 0); // 成
+        OLED_ShowChinese(80, 16, 17, 0); // 功
 
-        OLED_ShowChinese(24, 4, 25, 0); // 库
-        OLED_ShowChinese(40, 4, 26, 0); // 中
-        OLED_ShowChinese(56, 4, 27, 0); // 第
-        OLED_ShowNum(72, 4, id, 2, 16, 0);
-        OLED_ShowChinese(88, 4, 28, 0); // 个
+        OLED_ShowChinese(24, 32, 25, 0); // 库
+        OLED_ShowChinese(40, 32, 26, 0); // 中
+        OLED_ShowChinese(56, 32, 27, 0); // 第
+        OLED_ShowNum(72, 32, id, 2, 16, 0);
+        OLED_ShowChinese(88, 32, 28, 0); // 个
+        OLED_Refresh();
       }
       if (user_buffer[2] == 0X00 && user_buffer[5] == CMD_VERIFY_FACE &&
           user_buffer[6] == 0X0D) {
@@ -595,10 +615,10 @@ int menu_verify() {
         memset(user_buffer, 0x00, sizeof(user_buffer));
 
         OLED_Clear(0);           // 清空2~3行
-        OLED_ShowChinese(32, 2, 2, 0);  // 验
-        OLED_ShowChinese(48, 2, 3, 0);  // 证
-        OLED_ShowChinese(64, 2, 18, 0); // 失
-        OLED_ShowChinese(80, 2, 19, 0); // 败
+        OLED_ShowChinese(32, 16, 2, 0);  // 验
+        OLED_ShowChinese(48, 16, 3, 0);  // 证
+        OLED_ShowChinese(64, 16, 18, 0); // 失
+        OLED_ShowChinese(80, 16, 19, 0); // 败
       }
       if (KEY2_PRESSED == 1) {
         KEY2_PRESSED = 0;
@@ -623,23 +643,24 @@ int menu_verify() {
 }
 int menu_delete() {
 
-  OLED_Clear(0); // 清空2~7行
+  OLED_FillRect(0, 16, 128, 64, 0); // 清空2~7行
 
-  OLED_ShowChinese(0, 2, 8, 0);   // 再
-  OLED_ShowChinese(16, 2, 9, 0);  // 按
-  OLED_ShowChinese(32, 2, 10, 0); // 一
-  OLED_ShowChinese(48, 2, 11, 0); // 次
+  OLED_ShowChinese(0, 16, 8, 0);   // 再
+  OLED_ShowChinese(16, 16, 9, 0);  // 按
+  OLED_ShowChinese(32, 16, 10, 0); // 一
+  OLED_ShowChinese(48, 16, 11, 0); // 次
 
-  OLED_ShowChinese(64, 2, 4, 0);  // 注
-  OLED_ShowChinese(80, 2, 5, 0);  // 册
-  OLED_ShowChinese(96, 2, 6, 0);  // 人
-  OLED_ShowChinese(112, 2, 7, 0); // 脸
+  OLED_ShowChinese(64, 16, 4, 0);  // 注
+  OLED_ShowChinese(80, 16, 5, 0);  // 册
+  OLED_ShowChinese(96, 16, 6, 0);  // 人
+  OLED_ShowChinese(112,16, 7, 0); // 脸
 
-  OLED_ShowChinese(24, 4, 25, 0); // 库
-  OLED_ShowChinese(40, 4, 26, 0); // 中
-  OLED_ShowChinese(56, 4, 27, 0); // 第
-  OLED_ShowNum(72, 4, g_delete_id, 2, 16, 0);
-  OLED_ShowChinese(88, 4, 28, 0); // 个
+  OLED_ShowChinese(24, 32, 25, 0); // 库
+  OLED_ShowChinese(40, 32, 26, 0); // 中
+  OLED_ShowChinese(56, 32, 27, 0); // 第
+  OLED_ShowNum(72, 32, g_delete_id, 2, 16, 0);
+  OLED_ShowChinese(88, 32, 28, 0); // 个
+  OLED_Refresh();
 
   while (1) {
     if (KEY0_PRESSED == 1) {
@@ -694,10 +715,11 @@ int menu_delete() {
 
           OLED_Clear(0); // 清空2~5行
 
-          OLED_ShowChinese(32, 2, 4, 0);  // 删
-          OLED_ShowChinese(48, 2, 5, 0);  // 除
-          OLED_ShowChinese(64, 2, 16, 0); // 成
-          OLED_ShowChinese(80, 2, 17, 0); // 功
+          OLED_ShowChinese(32, 16, 4, 0);  // 删
+          OLED_ShowChinese(48, 16, 5, 0);  // 除
+          OLED_ShowChinese(64, 16, 16, 0); // 成
+          OLED_ShowChinese(80, 16, 17, 0); // 功
+          OLED_Refresh();
 
           HAL_GPIO_WritePin(FM225_CTL_GPIO_Port, FM225_CTL_Pin,
                             GPIO_PIN_RESET); // 关闭FM225的电源
@@ -715,10 +737,11 @@ int menu_delete() {
 
           OLED_Clear(0); // 清空2~5行
 
-          OLED_ShowChinese(32, 2, 4, 0);  // 删
-          OLED_ShowChinese(48, 2, 5, 0);  // 除
-          OLED_ShowChinese(64, 2, 16, 0); // 成
-          OLED_ShowChinese(80, 2, 17, 0); // 功
+          OLED_ShowChinese(32, 16, 4, 0);  // 删
+          OLED_ShowChinese(48, 16, 5, 0);  // 除
+          OLED_ShowChinese(64, 16, 16, 0); // 成
+          OLED_ShowChinese(80, 16, 17, 0); // 功
+          OLED_Refresh();
 
           HAL_GPIO_WritePin(FM225_CTL_GPIO_Port, FM225_CTL_Pin,
                             GPIO_PIN_RESET); // 关闭FM225的电源
@@ -748,14 +771,16 @@ int menu_delete() {
       KEY3_PRESSED = 0;
       if (g_delete_id < 99) {
         g_delete_id++;
-        OLED_ShowNum(72, 4, g_delete_id, 2, 16, 0);
+        OLED_ShowNum(72, 32, g_delete_id, 2, 16, 0);
+        OLED_Refresh();
       }
     }
     if (KEY2_PRESSED == 1) {
       KEY2_PRESSED = 0;
       if (g_delete_id > 0) {
         g_delete_id--;
-        OLED_ShowNum(72, 4, g_delete_id, 2, 16, 0);
+        OLED_ShowNum(72, 32, g_delete_id, 2, 16, 0);
+        OLED_Refresh();
       }
     }
     if (KEY1_PRESSED == 1) {
@@ -779,6 +804,7 @@ void OLED_ShowTime(void) {
 
   /* 显示在 OLED 第一行 */
   OLED_ShowString(0, 0, buf, 16, 0);
+  OLED_Refresh();
 }
 
 /* 定时器中断回调函数 */

@@ -7,7 +7,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
 #define OLED_I2C_ADDR (0x3C << 1) // 默认 0x78
 
 #define OLED_WIDTH 128
