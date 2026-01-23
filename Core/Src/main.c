@@ -21,7 +21,6 @@
 #include "dma.h"
 #include "i2c.h"
 #include "rtc.h"
-#include "stm32f1xx_hal.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -500,6 +499,10 @@ int menu_verify() {
 
     OLED_FillRect(0, 16, 128, 64, 0); // 清空2~7行
 
+    OLED_ShowChinese(40, 16, 2, 0);  // 验
+    OLED_ShowChinese(56, 16, 3, 0);  // 证
+    OLED_ShowChinese(72, 16, 15, 0); // 中
+
     OLED_ShowChinese(16, 16, 35, 0); // 设
     OLED_ShowChinese(32, 16, 36, 0); // 备
     OLED_ShowChinese(48, 16, 33, 0); // 正
@@ -653,7 +656,7 @@ int menu_delete() {
   OLED_ShowChinese(64, 16, 4, 0);  // 注
   OLED_ShowChinese(80, 16, 5, 0);  // 册
   OLED_ShowChinese(96, 16, 6, 0);  // 人
-  OLED_ShowChinese(112,16, 7, 0); // 脸
+  OLED_ShowChinese(112,16, 7, 0);  // 脸
 
   OLED_ShowChinese(24, 32, 25, 0); // 库
   OLED_ShowChinese(40, 32, 26, 0); // 中
@@ -665,6 +668,19 @@ int menu_delete() {
   while (1) {
     if (KEY0_PRESSED == 1) {
       KEY0_PRESSED = 0;
+      OLED_FillRect(0, 16, 128, 64, 0); // 清空2~7行
+
+      OLED_ShowChinese(40, 16, 4, 0);  // 删
+      OLED_ShowChinese(56, 16, 5, 0);  // 除
+      OLED_ShowChinese(72, 16, 15, 0); // 中
+
+      OLED_ShowChinese(16, 32, 35, 0); // 设
+      OLED_ShowChinese(32, 32, 36, 0); // 备
+      OLED_ShowChinese(48, 32, 33, 0); // 正
+      OLED_ShowChinese(64, 32, 39, 0); // 在
+      OLED_ShowChinese(80, 32, 37, 0); // 连
+      OLED_ShowChinese(96, 32, 38, 0); // 接
+      OLED_Refresh();
 
       // 重置 user_buffer 和 user_buffer_len
       user_buffer_len = 0;
