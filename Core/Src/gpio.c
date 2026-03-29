@@ -55,10 +55,7 @@ void MX_GPIO_Init(void)
                           |IO7_Pin|IO4_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(IO3_GPIO_Port, IO3_Pin, GPIO_PIN_SET);
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(FM225_CTL_GPIO_Port, FM225_CTL_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, IO3_Pin|FM225_CTL_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pins : IO1_Pin IO5_Pin IO2_Pin IO6_Pin
                            IO7_Pin IO4_Pin */
@@ -91,8 +88,8 @@ void MX_GPIO_Init(void)
   /*Configure GPIO pin : FM225_CTL_Pin */
   GPIO_InitStruct.Pin = FM225_CTL_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(FM225_CTL_GPIO_Port, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
