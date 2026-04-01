@@ -1,9 +1,10 @@
 # ==========================
 # STM32 + VSCode + CMake 必备忽略
 # ==========================
+.settings/
 build/
-.vscode/.cache
-.vscode/ipch
+.vscode/
+cmake/
 cmake-build-debug/
 cmake-build-release/
 CMakeFiles/
@@ -15,6 +16,10 @@ Makefile
 *.bin
 *.hex
 *.map
+
+# 你的工程无关目录
+FM225/FM225/x64
+FM225/FM225/.vs
 
 # 其他缓存
 .vs/
