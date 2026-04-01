@@ -1,5 +1,23 @@
-.settings/
-.vscode/
+# ==========================
+# STM32 + VSCode + CMake 必备忽略
+# ==========================
 build/
-FM225/FM225/x64
-FM225/FM225/.vs
+.vscode/.cache
+.vscode/ipch
+cmake-build-debug/
+cmake-build-release/
+CMakeFiles/
+*.cmake
+Makefile
+*.o
+*.d
+*.elf
+*.bin
+*.hex
+*.map
+
+# 其他缓存
+.vs/
+*.tlog
+*.user
+.DS_Store
