@@ -34,7 +34,7 @@ static HAL_StatusTypeDef _oled_write_cmd(const uint8_t *cmd, size_t len)
     uint8_t buf[len + 1];
     buf[0] = SSD1306_CTRL_CMD;
     memcpy(buf + 1, cmd, len);
-    return HAL_I2C_Master_Transmit(&hi2c1, OLED_I2C_ADDR, buf, (uint16_t)(len + 1), HAL_MAX_DELAY);
+    return HAL_I2C_Master_Transmit(&hi2c1, OLED_I2C_ADDR, buf, (uint16_t)(len + 1), 50);
 }
 /**
  * @brief 发送一页数据（128字节）
@@ -44,7 +44,7 @@ static HAL_StatusTypeDef _oled_write_page(const uint8_t *data128)
     uint8_t buf[129];
     buf[0] = SSD1306_CTRL_DAT;
     memcpy(buf + 1, data128, 128);
-    return HAL_I2C_Master_Transmit(&hi2c1, OLED_I2C_ADDR, buf, 129, HAL_MAX_DELAY);
+    return HAL_I2C_Master_Transmit(&hi2c1, OLED_I2C_ADDR, buf, 129, 50);
 }
 
 /**

@@ -55,7 +55,10 @@ void MX_GPIO_Init(void)
                           |IO7_Pin|IO4_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, IO3_Pin|FM225_CTL_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(IO3_GPIO_Port, IO3_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(FM225_CTL_GPIO_Port, FM225_CTL_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : IO1_Pin IO5_Pin IO2_Pin IO6_Pin
                            IO7_Pin IO4_Pin */

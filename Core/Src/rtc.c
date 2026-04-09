@@ -24,7 +24,7 @@
 #include "time.h"
 
 /* 年 月 日 时 分 秒 星期：0-Sunday*/
-uint16_t date_info[] = {2025, 9, 13, 18, 45, 0, 0};
+uint16_t date_info[] = {2026, 4, 8, 18, 39, 0, 0};
 
 void RTC_SetTime(uint16_t *time_info)
 {
